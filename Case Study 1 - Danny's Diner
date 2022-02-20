@@ -200,3 +200,44 @@ RIGHT JOIN members AS c
 ON a.customer_id = c.customer_id
 WHERE a.order_date < '2021-02-01' GROUP BY c.customer_id ORDER BY c.customer_id; 
 
+
+--Additional Challenges
+-- Challenge-1: Creating basic data tables that Danny and his team can use to quickly derive insights without 
+-- needing to join the underlying tables using SQL.
+
+SELECT a.customer_id, a.order_date, b.product_name, b.price,
+(CASE WHEN c.join_date <= a.order_date THEN 'Y'
+ 	  WHEN c.join_date > a.order_date THEN 'N'
+	  ELSE 'N'
+	  END) AS member
+FROM sales AS a 
+LEFT JOIN menu AS b
+ON a.product_id = b.product_id 
+LEFT JOIN members AS c
+ON a.customer_id = c.customer_id
+ORDER BY a.customer_id, a.order_date, b.product_name;
+ 
+-- Challenge-2: Danny also requires further information about the ranking of customer products, but he purposely does not 
+-- need the ranking for non-member purchases so he expects null ranking values for the records when customers are not 
+-- yet part of the loyalty program.
+
+
+WITH initial_table AS (SELECT a.customer_id, a.order_date, b.product_name, b.price,
+(CASE WHEN c.join_date <= a.order_date THEN 'Y'
+	 ELSE 'N'
+	 END) AS member
+FROM sales AS a 
+LEFT JOIN menu AS b
+ON a.product_id = b.product_id 
+LEFT JOIN members AS c
+ON a.customer_id = c.customer_id
+ORDER BY a.customer_id, a.order_date, b.product_name)
+
+SELECT *, 
+(CASE WHEN member = 'Y' THEN
+	 DENSE_RANK() OVER 
+	(PARTITION BY customer_id, member ORDER BY order_date)  
+	ELSE Null
+	END) AS ranking
+FROM initial_table;
+
