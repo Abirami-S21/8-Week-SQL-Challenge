@@ -111,40 +111,40 @@ ORDER BY a.customer_id, COUNT(a.product_id) DESC;
 
 --Using Dense Rank method
 SELECT customer_id, product_name FROM
-									(SELECT a.customer_id, b.product_name,
-									 		DENSE_RANK() OVER 
-												(PARTITION BY customer_id ORDER BY COUNT(a.product_id) DESC) product_rank 
-									 				FROM sales AS a LEFT JOIN menu AS b
-	  												 ON a.product_id = b.product_id GROUP BY a.customer_id, b.product_name)
-								AS ranking 
+(SELECT a.customer_id, b.product_name,
+DENSE_RANK() OVER 
+(PARTITION BY customer_id ORDER BY COUNT(a.product_id) DESC) product_rank 												
+FROM sales AS a LEFT JOIN menu AS b
+ON a.product_id = b.product_id GROUP BY a.customer_id, b.product_name)									 				
+AS ranking 
 WHERE product_rank = 1;
 	   	   
 -- 6. Which item was purchased first by the customer after they became a member?
 
 SELECT customer_id, product_name FROM
-									(SELECT a.customer_id, b.product_name, a.order_date,
-									 		DENSE_RANK() OVER 
-												(PARTITION BY a.customer_id ORDER BY a.order_date) AS product_rank 
-									 				FROM sales AS a LEFT JOIN menu AS b
-	  												 ON a.product_id = b.product_id 
-									 					LEFT JOIN members As c
-									 						ON a.customer_id = c.customer_id
-									 							WHERE a.order_date >= c.join_date
-									) AS ranking 
+(SELECT a.customer_id, b.product_name, a.order_date,
+DENSE_RANK() OVER 
+(PARTITION BY a.customer_id ORDER BY a.order_date) AS product_rank 
+FROM sales AS a LEFT JOIN menu AS b
+ON a.product_id = b.product_id 	  												 
+LEFT JOIN members As c									 					
+ON a.customer_id = c.customer_id									 						
+WHERE a.order_date >= c.join_date)
+AS ranking 									 						
 WHERE product_rank = 1;
 
 -- 7. Which item was purchased just before the customer became a member?
 
 SELECT customer_id, product_name FROM
-									(SELECT a.customer_id, b.product_name, a.order_date,
-									 		DENSE_RANK() OVER 
-												(PARTITION BY a.customer_id ORDER BY a.order_date DESC) AS product_rank 
-									 				FROM sales AS a LEFT JOIN menu AS b
-	  												 ON a.product_id = b.product_id 
-									 					LEFT JOIN members As c
-									 						ON a.customer_id = c.customer_id
-									 							WHERE a.order_date < c.join_date
-									) AS ranking 
+(SELECT a.customer_id, b.product_name, a.order_date,
+DENSE_RANK() OVER 
+(PARTITION BY a.customer_id ORDER BY a.order_date DESC) AS product_rank 
+FROM sales AS a LEFT JOIN menu AS b
+ON a.product_id = b.product_id 
+LEFT JOIN members As c
+ON a.customer_id = c.customer_id
+WHERE a.order_date < c.join_date)									
+AS ranking 
 WHERE product_rank = 1;
 
 -- 8. What is the total items and amount spent for each member before they became a member?
@@ -152,15 +152,15 @@ WHERE product_rank = 1;
 --Using dense_rank method
 
 SELECT customer_id, COUNT(product_id) AS total_items, SUM(price) AS total_amount FROM
-									(SELECT a.customer_id, b.product_name, a.order_date,a.product_id, b.price,
-									 		DENSE_RANK() OVER 
-												(PARTITION BY a.customer_id ORDER BY a.order_date DESC) AS product_rank 
-									 				FROM sales AS a LEFT JOIN menu AS b
-	  												 ON a.product_id = b.product_id 
-									 					 LEFT JOIN members As c
-									 						ON a.customer_id = c.customer_id
-									 							WHERE a.order_date < c.join_date
-									) AS ranking 
+(SELECT a.customer_id, b.product_name, a.order_date,a.product_id, b.price,
+DENSE_RANK() OVER
+(PARTITION BY a.customer_id ORDER BY a.order_date DESC) AS product_rank 
+FROM sales AS a LEFT JOIN menu AS b
+ON a.product_id = b.product_id 
+LEFT JOIN members As c
+ON a.customer_id = c.customer_id
+WHERE a.order_date < c.join_date)
+AS ranking 
 GROUP BY customer_id ORDER BY customer_id;
 
 --Using simple join
