@@ -91,7 +91,7 @@ ORDER BY a.customer_id, a.order_date, b.product_id;
 -- 4. What is the most purchased item on the menu and how many times was it purchased by all customers?
 
 SELECT a.product_id, b.product_name, COUNT(a.product_id) FROM sales AS a LEFT JOIN menu AS b
-	   ON a.product_id = b.product_id GROUP BY a.product_id, b.product_name ORDER BY COUNT(a.product_id) DESC;
+	   ON a.product_id = b.product_id GROUP BY a.product_id, b.product_name ORDER BY COUNT(a.product_id) DESC LIMIT 1;
 
 -- 5. Which item was the most popular for each customer?
 
@@ -179,8 +179,8 @@ GROUP BY a.customer_id ORDER BY a.customer_id;
 
 
 SELECT a.customer_id,  
-SUM(CASE WHEN b.product_name = 'sushi' THEN 2*b.price
-	 WHEN b.product_name != 'sushi' THEN 1*b.price
+SUM(CASE WHEN b.product_name = 'sushi' THEN 2*10*b.price
+	 WHEN b.product_name != 'sushi' THEN 1*10*b.price
 	 END) points
 FROM sales AS a 
 LEFT JOIN menu AS b
@@ -190,8 +190,8 @@ ON a.product_id = b.product_id GROUP BY a.customer_id ORDER BY a.customer_id;
 -- 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
 
 SELECT c.customer_id,  
-SUM(CASE WHEN c.join_date <= a.order_date and a.order_date < 7+ (c.join_date)  THEN 2*b.price
-	 ELSE 1*b.price
+SUM(CASE WHEN c.join_date <= a.order_date and a.order_date < 7+ (c.join_date)  THEN 2*10*b.price
+	 ELSE 1*10*b.price
 	 END) points
 FROM sales AS a 
 LEFT JOIN menu AS b
